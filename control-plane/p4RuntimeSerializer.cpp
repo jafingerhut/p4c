@@ -760,6 +760,23 @@ getMatchFields(const IR::P4Table* table,
         TypeSpecConverter::convert(refMap, typeMap, matchFieldType, p4RtTypeInfo);
         auto type_name = getTypeName(matchFieldType, typeMap);
         int width = getTypeWidth(matchFieldType, typeMap);
+
+        if (auto mem = keyElement->expression->to<IR::Member>()) {
+            auto type = typeMap->getType(mem->expr, true);
+            if (auto str = type->to<IR::Type_StructLike>()) {
+                auto name = str->getName();
+                auto program = findContext<IR::P4Program>();
+                auto decl = program->getDeclarations()->where([&](const IR::IDeclaration* d) { return d->getName() == name; })->single();
+                auto strDecl = decl->to<IR::Type_StructLike>();
+                auto field = strDecl->getField(mem->member);
+                auto ftype = field->type;
+                auto ftypeName = ftype->to<IR::Type_Name>();
+                auto ftypeDecl = program->getDeclarations()->where([&](const IR::IDeclaration* d) { return d->getName() == ftypeName->path->name; })->single();
+                auto typeDef = ftypeDecl->to<IR::Type_Typedef>();
+                if (typeDef != nullptr)
+                    ::dump(typeDef);
+            }
+        }
         matchFields.push_back(MatchField{*matchFieldName, id, *matchType,
                               matchTypeName, uint32_t(width),
                               keyElement->to<IR::IAnnotated>(), type_name});
