@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=p4lang/behavioral-model:latest
+ARG BASE_IMAGE=jafingerhut/behavioral-model:latest
 FROM ${BASE_IMAGE}
 LABEL maintainer="P4 Developers <p4-dev@lists.p4.org>"
 
